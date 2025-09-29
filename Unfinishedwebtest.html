@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title> small un unfinished web </title>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+body { margin:0; font-family:'Patrick Hand', cursive; background:#f9f5ff; }
+.scene { display:none; width:100%; height:100vh; position:relative; background-size:cover; background-position:center; }
+.scene.active { display:flex; justify-content:center; align-items:center; flex-direction:column; }
+.dialogue-box { 
+  background: rgba(255,255,255,0.95); 
+  padding:25px 30px; 
+  max-width:90%; 
+  text-align:center; 
+  font-size:20px; 
+  line-height:1.6; 
+  border-radius:20px; 
+  box-shadow:0 5px 15px rgba(0,0,0,0.2); 
+  display:flex; 
+  flex-direction:column; 
+  gap:15px; 
+  min-height:120px; 
+  z-index:2; 
+}
+.char { 
+  position:absolute; 
+  bottom:5%; 
+  z-index:1; 
+}
+button { 
+  font-size:20px; 
+  padding:12px 25px; 
+  border:none; 
+  border-radius:15px; 
+  cursor:pointer; 
+  transition:0.2s; 
+  font-family:'Patrick Hand', cursive; 
+}
+.btn-pastel { background:#ffd1dc; color:#333; }
+.btn-pastel:hover { background:#ffb3c6; }
+.btn-container { 
+  display:flex; 
+  flex-direction:row; 
+  gap:10px; 
+  justify-content:center; 
+  align-items:center; 
+  margin-top:10px;
+  z-index:3; 
+  position:relative;
+}
+@media (max-width:600px){
+  .dialogue-box { font-size:18px; padding:15px 20px; gap:10px; } 
+  .char { width:140px; } 
+  button { font-size:18px; padding:10px 20px; } 
+}
+</style>
+</head>
+<body>
+
+<!-- Audio -->
+<audio id="bgm-home" loop src="sad-dramatic-piano-background-music-song-311697.mp3"></audio>
+<audio id="bgm-desc" loop src="desc-music.mp3"></audio>
+<audio id="bgm-foru" loop src="cat-bag-382798.mp3"></audio>
+<audio id="type-sound" src="keyboard-typing-5997.mp3"></audio>
+<audio id="meow-sound" src="cat-meow-401729.mp3"></audio>
+
+<!-- Home -->
+<div class="scene active" id="home" style="background-image:url('Pink_sky.jpg');">
+  <div class="dialogue-box">
+    <h1>small unfinished web</h1>
+    <div class="btn-container">
+      <button id="btn-desc" class="btn-pastel">Description</button>
+      <button id="btn-foru" class="btn-pastel">For U</button>
+      <button id="btn-mini" class="btn-pastel">Mini Game</button>
+    </div>
+  </div>
+</div>
+
+<!-- Description -->
+<div class="scene" id="desc" style="background-image:url('Pink_sky.jpg');">
+  <img id="char-desc" class="char" src="Normaltallk00.png">
+  <div class="dialogue-box" id="desc-text"></div>
+  <div class="btn-container">
+    <button id="prev-desc" class="btn-pastel">Previous</button>
+    <button id="next-desc" class="btn-pastel">Next</button>
+    <button id="back-desc" class="btn-pastel">Go Back</button>
+  </div>
+</div>
+
+<!-- For U -->
+<div class="scene" id="foru" style="background-image:url('Road_background.jpg');">
+  <img id="char-foru" class="char" src="">
+  <div class="dialogue-box" id="dialogue-foru"></div>
+  <div class="btn-container">
+    <button id="prev-foru" class="btn-pastel">Previous</button>
+    <button id="next-foru" class="btn-pastel">Next</button>
+    <button id="back-foru" class="btn-pastel">Go Back</button>
+  </div>
+</div>
+
+<!-- Mini Game -->
+<div class="scene" id="mini" style="background-image:url('Pink_sky.jpg');">
+  <div class="dialogue-box" id="mini-text">*Error* The game code is not complete yet.*</div>
+  <div class="btn-container">
+    <button id="back-mini" class="btn-pastel">Go Back</button>
+  </div>
+</div>
+
+<script>
+// เล่นเสียงเมี้ยว
+function playMeow(){
+  const meow = document.getElementById('meow-sound');
+  meow.currentTime = 0;
+  meow.play();
+}
+
+// Scene switch
+function showScene(name){
+  document.querySelectorAll('.scene').forEach(s=>s.classList.remove('active'));
+  document.getElementById(name).classList.add('active');
+  ['bgm-home','bgm-desc','bgm-foru'].forEach(id=>{
+    const audio = document.getElementById(id);
+    audio.pause();
+    audio.currentTime=0;
+  });
+  if(name==='home') document.getElementById('bgm-home').play();
+  if(name==='desc') document.getElementById('bgm-desc').play();
+  if(name==='foru') document.getElementById('bgm-foru').play();
+}
+
+// Typewriter
+function typeText(el,text,callback,speed=100){
+  el.textContent='';
+  let i=0;
+  const typeSound=document.getElementById('type-sound');
+  typeSound.currentTime=0; 
+  typeSound.play();
+  function step(){
+    if(i<text.length){ 
+      el.textContent+=text[i]; 
+      i++; 
+      setTimeout(step,speed);
+    } else { 
+      typeSound.pause(); 
+      typeSound.currentTime=0; 
+      if(callback) callback(); 
+    }
+  }
+  step();
+}
+
+// ---------- Description ----------
+const descContent = [
+  "Hi! This website is still unfinished. i just send u this cus i want u to know that im not die (but mostly lmfao).",
+  "I fixed a lot more. Sometimes I go crazy btw it was fun for me now i got other hobby is'n darw."
+];
+let descIdx=0;
+const descTextEl=document.getElementById('desc-text');
+const charDescEl=document.getElementById('char-desc');
+
+function showDesc(idx){
+  if(idx<0) idx=0;
+  if(idx>=descContent.length) idx=descContent.length-1;
+  descIdx=idx;
+  charDescEl.style.bottom='0%';
+  charDescEl.style.right='0%';
+  charDescEl.style.width='370px';
+  charDescEl.src = idx === descContent.length - 1 ? "Sad00.png" : "Normaltallk00.png";
+  typeText(descTextEl, descContent[idx], ()=>{}, 100);
+}
+
+// ---------- For U ----------
+const foruContent = [
+  {text:"Hi! p hru doing? idk too btw hope u fine", char:"cat_smile.png"},
+  {text:"are you eat someting you shound eat a lot naa however i try to make a cutie web but as u see it must be fix a lot.", char:"cat_adore.png"},
+  {text:"Whatever goal you aim for, you can achieve it! Don’t push yourself", char:"cat_cute.png"},
+  {text:"I actually ordered 10 new canvases to draw for people i darw pai lew 2 thing and i think i will darw for u too.", char:"cat_smile.png"},
+  {text:"hope u accept naa my hobby now is a write code and i try to practice eng anyway enjoy u life !", char:"cat_adore.png"},
+  {text:"Pert Term Jerk Gan na krub", char:"cat_cute.png"}
+];
+let foruIdx=0;
+const dialForuEl=document.getElementById('dialogue-foru');
+const charForuEl=document.getElementById('char-foru');
+
+function showForU(idx){
+  if(idx<0) idx=0;
+  if(idx>=foruContent.length) idx=foruContent.length-1;
+  foruIdx=idx;
+  const data = foruContent[idx];
+  charForuEl.src = data.char;
+  charForuEl.style.bottom='0%';
+  charForuEl.style.right='0%';
+  charForuEl.style.width='370px';
+  typeText(dialForuEl, data.text, ()=>{}, 100);
+}
+
+// ---------- Buttons ----------
+document.getElementById('btn-desc').addEventListener('click', ()=>{
+  playMeow();
+  showScene('desc');
+  showDesc(descIdx);
+});
+
+document.getElementById('next-desc').addEventListener('click', ()=>showDesc(descIdx+1));
+document.getElementById('prev-desc').addEventListener('click', ()=>showDesc(descIdx-1));
+document.getElementById('back-desc').addEventListener('click', ()=>showScene('home'));
+
+document.getElementById('btn-foru').addEventListener('click', ()=>{
+  playMeow();
+  showScene('foru');
+  showForU(foruIdx);
+});
+document.getElementById('next-foru').addEventListener('click', ()=>showForU(foruIdx+1));
+document.getElementById('prev-foru').addEventListener('click', ()=>showForU(foruIdx-1));
+document.getElementById('back-foru').addEventListener('click', ()=>showScene('home'));
+
+document.getElementById('btn-mini').addEventListener('click', ()=>{
+  playMeow();
+  showScene('mini');
+});
+document.getElementById('back-mini').addEventListener('click', ()=>showScene('home'));
+</script>
+</body>
+</html>
